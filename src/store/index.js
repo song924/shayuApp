@@ -4,7 +4,10 @@ import Vuex from "vuex";
 Vue.use(Vuex);
 
 export default new Vuex.Store({
-  state: {},
+  state: {
+    month:0,
+    day:0
+  },
   mutations: {},
   actions: {},
   modules: {},

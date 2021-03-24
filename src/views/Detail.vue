@@ -16,7 +16,6 @@
         <!--  <p>2017年</p>
         <p style="border-right: 1px solid #000">
           06<span style="font-size: 12px; font-weight: normal">月<van-icon name="play" style="" /></span>
-          
         </p>
       </van-col>
       <van-col span="8">
@@ -41,10 +40,10 @@
           <div class="listTitle">
             <p>
               <span style="margin-right: 0.6rem">{{ item.date }}</span
-              >{{ item.week }}
+              >{{ item.weekDay }}
             </p>
             <p>
-              <span style="margin-right: 0.6rem">收入：{{ item.income }}</span
+              <span v-if="item.income" style="margin-right: 0.6rem">收入：{{ item.income }}</span
               ><span>支出：{{ item.expend }}</span>
             </p>
           </div>
@@ -59,8 +58,8 @@
             <div
               :class="{ listInfo: true, Bnone: index == item.info.length - 1 }"
             >
-              <div>{{ info.text }}</div>
-              <div>{{ info.money }}</div>
+              <div>{{ info.remark }}</div>
+              <div>{{ info.type == 'expend' ? '-'+info.money : info.money }}</div>
             </div>
           </van-cell>
           <template #right>
@@ -76,92 +75,7 @@
 export default {
   data() {
     return {
-      list: [
-        {
-          date: "6月11日",
-          week: "星期日",
-          income: "300",
-          expend: "500",
-          info: [
-            {
-              icon: "aaa",
-              text: "嘟嘟嘟",
-              money: "122",
-            },
-            {
-              icon: "bbb",
-              text: "嘤嘤嘤",
-              money: "82",
-            },
-            {
-              icon: "ccc",
-              text: "哇哇哇",
-              money: "15",
-            },
-            {
-              icon: "ddd",
-              text: "嘎嘎嘎",
-              money: "66",
-            },
-          ],
-        },
-        {
-          date: "6月15日",
-          week: "星期日",
-          income: "300",
-          expend: "500",
-          info: [
-            {
-              icon: "aaa",
-              text: "嘟嘟嘟",
-              money: "122",
-            },
-            {
-              icon: "bbb",
-              text: "嘤嘤嘤",
-              money: "82",
-            },
-            {
-              icon: "ccc",
-              text: "哇哇哇",
-              money: "15",
-            },
-            {
-              icon: "ddd",
-              text: "嘎嘎嘎",
-              money: "66",
-            },
-          ],
-        },
-        {
-          date: "6月12日",
-          week: "星期日",
-          income: "300",
-          expend: "500",
-          info: [
-            {
-              icon: "aaa",
-              text: "嘟嘟嘟",
-              money: "122",
-            },
-            {
-              icon: "bbb",
-              text: "嘤嘤嘤",
-              money: "82",
-            },
-            {
-              icon: "ccc",
-              text: "哇哇哇",
-              money: "15",
-            },
-            {
-              icon: "ddd",
-              text: "嘎嘎嘎",
-              money: "66",
-            },
-          ],
-        },
-      ],
+      list: JSON.parse(localStorage.totalInfo)[0].days,
       wHeight: 100,
       loading: false,
       finished: true,
