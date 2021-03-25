@@ -12,30 +12,43 @@
       </template>
     </van-nav-bar>
     <van-row class="total" style="">
-      <van-col span="8">
-        <!--  <p>2017年</p>
+      <van-col span="8" @click="showDate=true">
+         <p>{{$store.state.year}}</p>
         <p style="border-right: 1px solid #000">
-          06<span style="font-size: 12px; font-weight: normal">月<van-icon name="play" style="" /></span>
+          {{$store.state.month}}<span style="font-size: 12px; font-weight: normal">月<van-icon name="play" style="" /></span>
         </p>
       </van-col>
       <van-col span="8">
         <p>收入</p>
         <p>
-          12315.<span style="font-size: 12px; font-weight: normal">22</span>
+          <!-- 12315.<span style="font-size: 12px; font-weight: normal">22</span> -->
+          {{$store.state.monthIncome}}
         </p>
       </van-col>
       <van-col span="8">
         <p>支出</p>
         <p>
-          10235.<span style="font-size: 12px; font-weight: normal">13</span>
-        </p> -->
+          <!-- 10235.<span style="font-size: 12px; font-weight: normal">13</span> -->
+          {{$store.state.monthExpend}}
+        </p>
       </van-col>
+      <van-popup v-model="showDate" position="bottom">
+        <van-datetime-picker
+            @confirm="selectDate"
+            @cancel="showDate=false"
+            v-model="currentDate"
+            :min-date="minDate"
+            :max-date="maxDate"
+            type="year-month"
+            title="选择年月"
+          />
+      </van-popup>
     </van-row>
     <div
       class="detailList"
       :style="{ height: wHeight + 'px', overflow: 'scroll' }"
     >
-      <div class="subList" v-for="(item, i) in list" :key="i">
+      <div class="subList" v-for="(item, month) in list" :key="month">
         <van-swipe-cell>
           <div class="listTitle">
             <p>
@@ -48,7 +61,7 @@
             </p>
           </div>
           <template #right>
-            <van-button square type="danger" text="删除" />
+            <van-button square type="danger" @click="delDay(month)" text="删除" />
           </template>
         </van-swipe-cell>
 
@@ -63,7 +76,7 @@
             </div>
           </van-cell>
           <template #right>
-            <van-button square type="danger" text="删除" />
+            <van-button square type="danger" @click="delDayInfo(month,index)" text="删除" />
           </template>
         </van-swipe-cell>
       </div>
@@ -75,10 +88,18 @@
 export default {
   data() {
     return {
-      list: JSON.parse(localStorage.totalInfo)[0].days,
+      showDate:false,
+      currentDate:false,
+      list: this.$store.state.accountBook[parseInt(this.$store.state.month)-1].days,
+      pageMonth:parseInt(this.$store.state.month)-1,
       wHeight: 100,
       loading: false,
       finished: true,
+      monthExpend:localStorage.monthExpend ? localStorage.monthExpend : 0,
+      monthIncome:localStorage.monthIncome ? localStorage.monthIncome : 0,
+      minDate: new Date(2021, 0),
+      maxDate: new Date(2021, 11),
+      
     };
   },
   created() {},
@@ -86,7 +107,84 @@ export default {
     console.log(window.screen.height);
     this.wHeight = window.screen.height - 156;
   },
-  methods: {},
+  methods: {
+    //删除天
+    delDay(month){
+      console.log("删除第几天",month)
+     /*  let day = this.$store.state.accountBook
+      let expend = day[this.pageMonth].days[i].expend
+      let income = day[this.pageMonth].days[i].income
+      day[this.pageMonth].monthExpend = day[this.pageMonth].monthExpend - parseFloat(expend)
+      day[this.pageMonth].monthIncome = day[this.pageMonth].monthIncome - parseFloat(income) */
+      this.computeMoney(month)
+      
+
+      
+    },
+    //删除同一天不同信息
+    delDayInfo(i,info){
+      console.log("删除当天的第几条信息",info)
+      /* let month = this.$store.state.accountBook
+      let expend = month[this.pageMonth].days[i].expend //当天
+      let income = month[this.pageMonth].days[i].income //当天
+      let dayInfo = month[this.pageMonth].days[i].info[info] //当天记录金额 */
+      
+      this.computeMoney(i,info)
+     /*  month[this.pageMonth].monthExpend = month[this.pageMonth].monthExpend - month[this.pageMonth].days[i].expend
+      month[this.pageMonth].monthIncome = month[this.pageMonth].monthIncome - month[this.pageMonth].days[i].income
+
+      month[this.pageMonth].days[i].info.splice(info,1) */
+      /* if(month[this.pageMonth].days[i].info.length){
+
+      }else{
+        this.delDay(i)
+      } */
+      // localStorage.setItem("totalInfo",JSON.stringify(month))
+    },
+    //选择年月日
+    selectDate(val){
+      let d = new Date(val);
+      let datetime =
+        d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate();
+      console.log(datetime)
+      this.$store.commit('changeDate',{
+          year:d.getFullYear(),
+          month:(d.getMonth() + 1) >= 10 ? (d.getMonth() + 1) : "0" + (d.getMonth() + 1)
+      })
+      this.list = this.$store.state.accountBook[parseInt((d.getMonth() + 1))-1].days,
+      this.showDate = false
+    },
+    //计算总收入支出方法
+    computeMoney(month,sub){
+        let day = /* this.$store.state.accountBook */JSON.parse(localStorage.totalInfo)
+        let expend = day[this.pageMonth].days[month].expend
+        let income = day[this.pageMonth].days[month].income
+        if(sub||sub == 0){
+          let dayInfo = day[this.pageMonth].days[month].info[sub] //当天记录金额
+          if(dayInfo.type == "expend"){
+              day[this.pageMonth].days[month].expend = expend - parseFloat(dayInfo.money)
+          }else{
+              day[this.pageMonth].days[month].income = income - parseFloat(dayInfo.money)
+          }
+          day[this.pageMonth].monthExpend = day[this.pageMonth].monthExpend -  day[this.pageMonth].days[month].expend 
+          day[this.pageMonth].monthIncome = day[this.pageMonth].monthIncome -  day[this.pageMonth].days[month].income 
+          day[this.pageMonth].days[month].info.splice(sub,1)
+          /* this.$store.commit("changeMonthInfo",{
+              monthExpend:day[this.pageMonth].monthExpend,
+              monthIncome:day[this.pageMonth].monthIncome
+          }) */
+        }else{
+          day[this.pageMonth].monthExpend = day[this.pageMonth].monthExpend - parseFloat(expend)
+          day[this.pageMonth].monthIncome = day[this.pageMonth].monthIncome - parseFloat(income)
+          day[this.pageMonth].days.splice(month,1)
+          this.$store.commit("changeMonthInfo",{
+            monthExpend:day[this.pageMonth].monthExpend,
+            monthIncome:day[this.pageMonth].monthIncome
+        })
+        }
+        localStorage.setItem("totalInfo",JSON.stringify(day))
+    }
+  },
 };
 </script>
 
