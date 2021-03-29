@@ -5,7 +5,7 @@
         <!-- 返回 -->
       </template>
       <template #title>
-        <!-- <img src="@/assets/syjz.png" alt="" style="height:1.5rem;"> -->
+        <img src="@/assets/syjz.png" alt="" style="height:1.5rem;">
       </template>
       <template #right>
         <!-- <van-icon name="search" size="18" /> -->
@@ -48,7 +48,7 @@
       class="detailList"
       :style="{ height: wHeight + 'px', overflow: 'scroll' }"
     >
-      <div class="subList" v-for="(item, month) in list" :key="month">
+      <div class="subList" v-for="(item, month) in $store.state.list.days" :key="month">
         <van-swipe-cell>
           <div class="listTitle">
             <p>
@@ -90,7 +90,7 @@ export default {
     return {
       showDate:false,
       currentDate:false,
-      list: this.$store.state.accountBook[parseInt(this.$store.state.month)-1].days,
+      list: this.$store.state.list.days,
       pageMonth:parseInt(this.$store.state.month)-1,
       wHeight: 100,
       loading: false,
@@ -151,37 +151,56 @@ export default {
           year:d.getFullYear(),
           month:(d.getMonth() + 1) >= 10 ? (d.getMonth() + 1) : "0" + (d.getMonth() + 1)
       })
-      this.list = this.$store.state.accountBook[parseInt((d.getMonth() + 1))-1].days,
+      // this.list = this.$store.state.accountBook[parseInt((d.getMonth() + 1))-1].days,
+      this.$store.commit("changeList",parseInt((d.getMonth() + 1))-1)
+      this.$store.commit("changeMonthInfo",{
+        monthExpend:this.$store.state.accountBook[parseInt((d.getMonth() + 1))-1].monthExpend,
+        monthIncome:this.$store.state.accountBook[parseInt((d.getMonth() + 1))-1].monthIncome
+      })
       this.showDate = false
     },
     //计算总收入支出方法
     computeMoney(month,sub){
-        let day = /* this.$store.state.accountBook */JSON.parse(localStorage.totalInfo)
+        let day = this.$store.state.accountBook/* JSON.parse(localStorage.totalInfo) */
         let expend = day[this.pageMonth].days[month].expend
         let income = day[this.pageMonth].days[month].income
         if(sub||sub == 0){
           let dayInfo = day[this.pageMonth].days[month].info[sub] //当天记录金额
           if(dayInfo.type == "expend"){
               day[this.pageMonth].days[month].expend = expend - parseFloat(dayInfo.money)
+              day[this.pageMonth].monthExpend = day[this.pageMonth].monthExpend - parseFloat(dayInfo.money)
           }else{
               day[this.pageMonth].days[month].income = income - parseFloat(dayInfo.money)
+               day[this.pageMonth].monthIncome = day[this.pageMonth].monthIncome - parseFloat(dayInfo.money)
           }
-          day[this.pageMonth].monthExpend = day[this.pageMonth].monthExpend -  day[this.pageMonth].days[month].expend 
-          day[this.pageMonth].monthIncome = day[this.pageMonth].monthIncome -  day[this.pageMonth].days[month].income 
+          
+          console.log("expend",day[this.pageMonth].days[month].expend )
+          console.log("income",day[this.pageMonth].days[month].income )
+
           day[this.pageMonth].days[month].info.splice(sub,1)
-          /* this.$store.commit("changeMonthInfo",{
-              monthExpend:day[this.pageMonth].monthExpend,
-              monthIncome:day[this.pageMonth].monthIncome
-          }) */
+          if(day[this.pageMonth].days[month].info.length){
+
+          }else{
+            day[this.pageMonth].days.splice(month,1)
+          }
+          
         }else{
           day[this.pageMonth].monthExpend = day[this.pageMonth].monthExpend - parseFloat(expend)
           day[this.pageMonth].monthIncome = day[this.pageMonth].monthIncome - parseFloat(income)
+          
           day[this.pageMonth].days.splice(month,1)
-          this.$store.commit("changeMonthInfo",{
-            monthExpend:day[this.pageMonth].monthExpend,
-            monthIncome:day[this.pageMonth].monthIncome
-        })
+          
         }
+
+        this.$store.commit("changeMonthInfo",{
+              monthExpend:day[this.pageMonth].monthExpend,
+              monthIncome:day[this.pageMonth].monthIncome
+        })
+        console.log("monthExpend",day[this.pageMonth].monthExpend)
+        console.log("monthIncome",day[this.pageMonth].monthIncome)
+        
+
+        
         localStorage.setItem("totalInfo",JSON.stringify(day))
     }
   },

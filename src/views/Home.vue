@@ -321,6 +321,12 @@ export default {
       year:this.getDate().split("/")[0],
       month:this.getDate().split("/")[1]
     })
+    this.$store.commit('changeList',parseInt(this.$store.state.month)-1)
+    this.$store.commit("changeMonthInfo",{
+        monthExpend:this.$store.state.list.monthExpend,
+        monthIncome:this.$store.state.list.monthIncome
+    })
+    
   },
   methods: {
     //弹起记账本
@@ -416,6 +422,7 @@ export default {
         lsInfo.remark = this.remark;
         localStorage.setItem("subInfo", JSON.stringify(lsInfo));
         this.setTotalInfo(lsInfo);
+
       } else {
         alert("请输入金额");
       }
@@ -494,6 +501,7 @@ export default {
           monthExpend:lsTotalInfo[this.pageMonth].monthExpend,
           monthIncome:lsTotalInfo[this.pageMonth].monthIncome
         }) */
+        console.log("新建月份")
       } else {
         console.log(days);
         let datas = lsTotalInfo[isMonth].days;
@@ -517,6 +525,10 @@ export default {
           };
           datas.push(data);
           data.info.push(info);
+          if(lsTotalInfo[isMonth].days.length <= 1){
+            lsTotalInfo[isMonth].monthExpend = type == "expend" ? money : 0,
+            lsTotalInfo[isMonth].monthIncome = type == "income" ? money : 0
+          }
         } else {
           console.log("有这一天的信息，插入");
           let income_total = 0;
@@ -554,12 +566,21 @@ export default {
         lsTotalInfo[isMonth].days.sort(this.compare('day'))
         // localStorage.setItem("monthExpend",lsTotalInfo[isMonth].monthExpend)
         // localStorage.setItem("monthIncome",lsTotalInfo[isMonth].monthIncome)
+        console.log(lsTotalInfo)
         this.$store.commit("changeMonthInfo",{
           monthExpend:lsTotalInfo[isMonth].monthExpend,
           monthIncome:lsTotalInfo[isMonth].monthIncome
         })
       }
       console.log(lsTotalInfo);
+      this.$store.commit('changeDate',{
+          year:info.date.split("/")[0],
+          month:info.date.split("/")[1]
+      })
+      this.$store.commit("changeList",parseInt(info.date.split("/")[1])-1)
+      
+      console.log(this.$store.state.list)
+      // this.list = this.$store.state.accountBook[parseInt((d.getMonth() + 1))-1].days,
       //计算本月总金额&&
       
       localStorage.setItem("totalInfo", JSON.stringify(lsTotalInfo));
