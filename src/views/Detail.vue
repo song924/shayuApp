@@ -5,7 +5,7 @@
         <!-- 返回 -->
       </template>
       <template #title>
-        <img src="@/assets/syjz.png" alt="" style="height:1.5rem;">
+        <!-- <img src="@/assets/syjz.png" alt="" style="height:1.5rem;"> -->
       </template>
       <template #right>
         <!-- <van-icon name="search" size="18" /> -->
@@ -67,7 +67,7 @@
 
         <van-swipe-cell v-for="(info, index) in item.info" :key="index">
           <van-cell :border="false">
-            <img src="" alt="" />
+            <van-icon :name="info.icon" size="1rem" color="#ffda44" />
             <div
               :class="{ listInfo: true, Bnone: index == item.info.length - 1 }"
             >
@@ -257,24 +257,25 @@ export default {
     padding: 0.2rem 0.8rem;
     line-height: 1.5rem;
     font-size: 12px;
-    border-bottom: 1px solid #ebedf0;
+    border-bottom: 1px solid #f5f5f5;
     color: rgb(150, 150, 150);
   }
   .van-cell__value--alone {
     display: flex;
     padding-left: 0.8rem;
-    img {
-      width: 1rem;
-      height: 1rem;
-      border: 1px solid #ebedf0;
+    .van-icon {
       margin: auto 0;
-      margin-right: 1rem;
+      // margin-top: 0.7rem;
+      margin-right: 0.6rem;
+      border-radius: 50%;
+      background: #f5f5f5;
+      padding: 0.3rem;
     }
     .listInfo {
       display: flex;
       justify-content: space-between;
       width: 100%;
-      border-bottom: 1px solid #ebedf0;
+      border-bottom: 1px solid #f5f5f5;
       line-height: 3rem;
       padding-right: 0.8rem;
     }

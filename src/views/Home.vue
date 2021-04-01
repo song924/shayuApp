@@ -12,7 +12,7 @@
           style="
             padding: 0.3rem;
             border-radius: 50%;
-            border: 1px solid #ebedf0;
+            border: 1px solid #f5f5f5;
             display: flex;
             background: #fff;
           "
@@ -59,15 +59,11 @@
         <van-tab title="支出" name="expend">
           <div :style="{ height: wHeight + 'px', overflow: 'scroll' }">
             <van-row class="iconList" style="padding: 1rem 1.5rem">
-              <van-col span="6">
-                <van-icon
-                  @click="editInfo('cy')"
-                  name="friends-o"
-                  size="2rem"
-                />
-                <p>餐饮</p>
-              </van-col>
-              <van-col span="6">
+              <van-col span="6" v-for="(item,index) in iconList" :key="index">
+              <van-icon @click="editInfo(item)" :name="item.icon" size="1.8rem" />
+              <p>{{item.name}}</p>
+            </van-col>
+              <!-- <van-col span="6">
                 <van-icon @click="editInfo('gw')" name="fire-o" size="2rem" />
                 <p>购物</p>
               </van-col>
@@ -87,16 +83,24 @@
                 />
                 <p>交通</p>
               </van-col>
+              <van-col span="6">
+                <van-icon
+                  @click="editInfo('jt')"
+                  name="point-gift-o"
+                  size="2rem"
+                />
+                <p>交通</p>
+              </van-col> -->
             </van-row>
           </div>
         </van-tab>
         <van-tab title="收入" name="income">
           <van-row class="iconList" style="padding: 1rem 1.5rem">
-            <van-col span="6">
-              <van-icon @click="editInfo('cy')" name="friends-o" size="2rem" />
-              <p>餐饮</p>
+            <van-col span="6" v-for="(item,index) in iconList" :key="index">
+              <van-icon @click="editInfo(item)" :name="item.icon" size="1.8rem" />
+              <p>{{item.name}}</p>
             </van-col>
-            <van-col span="6">
+           <!--  <van-col span="6">
               <van-icon @click="editInfo('gw')" name="fire-o" size="2rem" />
               <p>购物</p>
             </van-col>
@@ -111,7 +115,7 @@
                 size="2rem"
               />
               <p>交通</p>
-            </van-col>
+            </van-col> -->
           </van-row>
         </van-tab>
         <van-popup
@@ -125,14 +129,16 @@
             :class="{ numTitle: true, numTitle_fixed: isFixed }"
             style="display: flex; justify-content: space-between"
           >
-            <p>
+            <p style="display: flex;">
               备注：<input
                 placeholder="点击写备注..."
                 type="text"
+                id="remark"
                 v-model="remark"
-                @focus="showInput"
-                @blur="hideInput"
               />
+              <!-- @keydown="hideInput"@focus="showInput" -->
+              <!-- <van-field id="remark" style="height:100%" v-model="remark" placeholder="点击写备注..."  @focus="showInput"
+                @blur="hideInput"/> -->
             </p>
             <p>{{ money }}</p>
           </div>
@@ -312,6 +318,25 @@ export default {
       currentDate: new Date(),
       dateVal: "今天",
       pageMonth:parseInt(this.$store.state.month)-1,
+      iconList:[
+        {
+          icon:"friends-o",
+          fun:"cy",
+          name:"餐饮"
+        },{
+          icon:"fire-o",
+          fun:"gw",
+          name:"购物"
+        },{
+          icon:"comment-o",
+          fun:"ry",
+          name:"日用"
+        },{
+          icon:"point-gift-o",
+          fun:"jt",
+          name:"交通"
+        },
+      ]
     };
   },
   created(){
@@ -326,6 +351,9 @@ export default {
         monthExpend:this.$store.state.list.monthExpend,
         monthIncome:this.$store.state.list.monthIncome
     })
+    
+  },
+  mounted(){
     
   },
   methods: {
@@ -353,17 +381,20 @@ export default {
         this.numModal = true;
       }
       let data = {
-        icon: val,
+        icon: val.icon,
         date: nowDateTime,
         money: "",
         type: this.active1,
-        remark: "",
+        remark: val.name,
       };
       localStorage.setItem("subInfo", JSON.stringify(data));
       setTimeout(() => {
         let height = document.getElementById("numModal").clientHeight;
         this.numH = (height - 44) / 4;
         console.log((height - 44) / 4);
+        /* document.onkeydown((e)=>{
+          console.log(e)
+        }) */
       }, 100);
     },
     //输入价格
@@ -392,8 +423,16 @@ export default {
       this.isFixed = true;
     },
     //失焦输入框
-    hideInput() {
-      this.isFixed = false;
+    hideInput(e) {
+      if(e.keycode == 13){
+        // this.isFixed = false;
+        if(this.money){
+          saveInfo()
+        }else{
+          cordova.plugins.Keyboard.close();
+        }
+      }
+      // this.isFixed = false;
     },
     //获取时间选择器的时间
     getSelectDate(val) {
@@ -419,10 +458,9 @@ export default {
       if (this.money) {
         let lsInfo = JSON.parse(localStorage.subInfo);
         lsInfo.money = this.money;
-        lsInfo.remark = this.remark;
+        this.remark ? lsInfo.remark = this.remark : "";
         localStorage.setItem("subInfo", JSON.stringify(lsInfo));
         this.setTotalInfo(lsInfo);
-
       } else {
         alert("请输入金额");
       }
@@ -625,13 +663,14 @@ export default {
 .iconList {
   .van-col--6 {
     height: 4rem;
+    margin-bottom: 1.2rem;
     p {
       font-size: 12px;
     }
     .van-icon {
       border-radius: 50%;
-      background: #ebedf0;
-      padding: 0.4rem;
+      background: #f5f5f5;
+      padding: 0.5rem;
       margin-bottom: 0.2rem;
     }
     .icon_active {
@@ -641,7 +680,7 @@ export default {
 }
 #numModal {
   .numTitle {
-    background: #ebedf0;
+    background: #f5f5f5;
     height: 26px;
     line-height: 26px;
     border-top: 1px solid #ccc;
@@ -653,11 +692,14 @@ export default {
         font-size: 14px;
         width: 80%;
         text-align: left;
-        input {
+        input{
           border: 0;
           padding: 0;
           width: 80%;
-          background: #ebedf0;
+          background: #f5f5f5;
+          /deep/.van-field__body{
+            height: 100% ;
+          }
         }
       }
       &:last-of-type {
@@ -681,7 +723,7 @@ export default {
       .van-button--default {
         border: 0;
         font-size: 18px;
-        background: #ebedf0;
+        background: #f5f5f5;
         border-radius: 0;
       }
     }
