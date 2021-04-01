@@ -5,7 +5,7 @@
         <!-- 返回 -->
       </template>
       <template #title>
-        <!-- <img src="@/assets/syjz.png" alt="" style="height:1.5rem;"> -->
+        <img src="@/assets/syjz.png" alt="" style="height:1.5rem;">
       </template>
       <template #right>
         <!-- <van-icon name="search" size="18" /> -->
